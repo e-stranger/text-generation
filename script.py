@@ -57,6 +57,8 @@ def process_i(index):
 
 
 def encode_sequences(sequences, word_dict, seq_length, n_vocab):
+        size = 8 * len(sequences) * seq_length * n_vocab / 1000000
+        print(f"{size} MB storage required")
         data = np.zeros(shape=(len(sequences), seq_length, n_vocab), dtype=np.int8)
         for sequence in sequences:
             if len(sequence) > seq_length:
@@ -85,7 +87,10 @@ def fit_gen2(word_dict, seq_length, n_vocab, step_data=100, step_token=1):
         total_iterations = math.floor((num_seq - step_data) // step_data)
         
         print("here")
-        [process_i(i) for i in range(0, num_seq - step_data, step_data)]
+        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+                result = executor.map(process_i, range(0, num_seq - step_data, step_data))
+                for i in result:
+                        print(i)
 
         return True
                                                                                                                                                                                                                                                                     
